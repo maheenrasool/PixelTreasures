@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - PixelTreasures</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .home-container {
+            text-align: center;
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        .home-container button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .home-container button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="home-container">
+        <h2>Welcome to PixelTreasures</h2>
+        <button onclick="window.location.href='/shop'">Shop</button>
+        <button onclick="window.location.href='/login'">Login</button>
+        <div>
+            <p style="margin-top: 1.5rem;">Want to turn your art into treasures? Click below!</p>
+            <button onclick="window.location.href='/signup'">Sign Up</button>
+        </div>
+    </div>
+</body>
+</html>

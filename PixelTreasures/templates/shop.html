@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - PixelTreasures</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 2rem;
+            margin: 0;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .cart-icon {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            transition: right 0.3s;
+        }
+        .cart-counter {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 5px 10px;
+        }
+        .product-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .product {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 200px;
+        }
+        .product img {
+            width: 100%;
+            border-radius: 8px;
+        }
+        .product h3 {
+            margin: 0.5rem 0;
+        }
+        .product p {
+            margin: 0.5rem 0;
+        }
+        .product button {
+            padding: 0.5rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .product button:hover {
+            background-color: #218838;
+        }
+        .cart {
+            position: fixed;
+            right: -300px;
+            top: 0;
+            width: 300px;
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.5);
+            transition: right 0.3s;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        .cart.open {
+            right: 0;
+        }
+        .cart h3 {
+            margin-top: 0;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .cart-item img {
+            width: 50px;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Product Listings</h2>
+        <div class="cart-icon" id="cart-icon" onclick="toggleCart()">
+            <img src="static/add-to-cart.png" alt="Cart Icon" width="40">
+            <span class="cart-counter" id="cart-counter">0</span>
+        </div>
+    </div>
+    <div class="product-list">
+        {% if art_pieces %}
+            {% for art in art_pieces %}
+            <div class="product">
+                <img src="{{ url_for('static', filename='uploads/' ~ art.item_num ~ '.png') }}" alt="Art Image">
+                <h3>Art Piece #{{ art.item_num }}</h3>
+                <p>Price: ${{ art.item_price }}</p>
+                <form onsubmit="addToCart(event, {{ art.item_num }}, '{{ art.item_price }}');">
+                    <button type="submit">Add to Cart</button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No art pieces available.</p>
+        {% endif %}
+    </div>
+    <div class="cart" id="cart">
+        <div class="cart-icon" id="cart-icon-inner" onclick="toggleCart()">
+            <img src="static/add-to-cart.png" alt="Cart Icon" width="40">
+            <span class="cart-counter" id="cart-counter-inner">0</span>
+        </div>
+        <h3>Your Cart</h3>
+        <div id="cart-items"></div>
+        <div class="cart-total" id="cart-total">Total: $0</div>
+        <form id="payment-form" action="calculate_order_amount" method="post" onsubmit="event.preventDefault(); continueToPayment();">
+            <input type="hidden" id="total-input" name="total" value="0">
+            <button type="submit">Continue to Payment</button>
+        </form>
+    </div>
+    <script>
+        let cartCounter = 0;
+const cartItems = [];
+let totalAmount = 0;
+
+function toggleCart() {
+    const cart = document.getElementById('cart');
+    const cartIcon = document.getElementById('cart-icon');
+    cart.classList.toggle('open');
+    if (cart.classList.contains('open')) {
+        cartIcon.style.right = '300px';
+    } else {
+        cartIcon.style.right = '10px';
+    }
+}
+
+function addToCart(event, itemNum, itemPrice) {
+    event.preventDefault();
+    cartCounter++;
+    document.getElementById('cart-counter').innerText = cartCounter;
+    document.getElementById('cart-counter-inner').innerText = cartCounter;
+    cartItems.push({ itemNum, itemPrice });
+    totalAmount += parseFloat(itemPrice);
+    updateCart();
+
+    // Send the updated total to the backend
+    const formData = new FormData();
+    formData.append('total', totalAmount.toFixed(2));
+
+    fetch('/calculate_order_amount', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data); // Handle the response data if needed
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+function updateCart() {
+    const cartItemsContainer = document.getElementById('cart-items');
+    cartItemsContainer.innerHTML = '';
+    cartItems.forEach(item => {
+        const cartItem = document.createElement('div');
+        cartItem.classList.add('cart-item');
+        cartItem.innerHTML = `
+            <img src="static/uploads/${item.itemNum}.png" alt="Art Image">
+            <div>
+                <p>Art Piece #${item.itemNum}</p>
+                <p>Price: $${item.itemPrice}</p>
+            </div>
+        `;
+        cartItemsContainer.appendChild(cartItem);
+    });
+    document.getElementById('cart-total').innerText = `Total: $${totalAmount.toFixed(2)}`;
+    document.getElementById('total-input').value = totalAmount.toFixed(2);
+}
+
+    function continueToPayment() {
+        // Redirect to the payment page
+        window.location.href = '/payment'; 
+    }
+
+    </script>
+</body>
+</html>
+
+

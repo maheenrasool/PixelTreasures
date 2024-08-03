@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Profile - PixelTreasures</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 1200px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group button {
+            padding: 0.75rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #218838;
+        }
+        .art-list {
+            margin-top: 2rem;
+        }
+        .art-item {
+            margin-bottom: 1rem;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .art-item img {
+            max-width: 150px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome to Your Treasure Box</h2>
+        
+        <!-- Upload Art -->
+        <div class="form-group">
+            <h3>Upload New Art</h3>
+            <form action="/seller_profile" method="post" enctype="multipart/form-data">
+                <label for="art_image">Art Image:</label>
+                <input type="file" id="art_image" name="art_image" required>
+                
+                <label for="art_price">Price:</label>
+                <input type="text" id="art_price" name="art_price" placeholder="Enter price" required>
+                
+                <label for="payment_method">Payment Method:</label>
+                <input type="text" id="payment_method" name="payment_method" placeholder="Enter payment method" required>
+                
+                <button type="submit">Upload Art</button>
+            </form>
+        </div>
+        
+        <!-- Manage Art Pieces -->
+        <div class="art-list">
+            <h3>Your Art Pieces</h3>
+            {% if art_pieces %}
+                {% for art in art_pieces %}
+                <div class="art-item">
+                    <img src="{{ url_for('static', filename='uploads/' ~ art.item_num ~ '.png') }}" alt="Art Image" style="width: 100px; height: auto;">
+                    <div>
+                        <p>Status: <span>{{ 'Sold' if art.item_status == 1 else 'Available' }}</span></p>
+                        <p>Price: <span>${{ art.item_price }}</span></p>
+                        <form action="/update_art" method="post">
+                            <input type="hidden" name="art_id" value="{{ art.item_num }}">
+                            <label for="new_price">Update Price:</label>
+                            <input type="text" id="new_price" name="new_price" placeholder="Enter new price">
+                            <button type="submit">Update Price</button>
+                        </form>
+                        <form action="/delete_art" method="post">
+                            <input type="hidden" name="art_id" value="{{ art.item_num }}">
+                            <button type="submit">Delete Art</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No art pieces available.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
